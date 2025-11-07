@@ -29,9 +29,6 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OPENGL_MAJOR_VERSION);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OPENGL_MINOR_VERSION);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
 
     GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, NULL, NULL);
     if (!window) {
@@ -41,7 +38,6 @@ int main(void) {
     }
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         glfwDestroyWindow(window);
@@ -49,6 +45,11 @@ int main(void) {
         fprintf(stderr, "[ERROR]: failed to initialize GLAD\n");
         return EXIT_FAILURE;
     }
+
+    int fb_w = 0, fb_h = 0;
+    glfwGetFramebufferSize(window, &fb_w, &fb_h);
+    glViewport(0, 0, fb_w, fb_h);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     print_gl_info();
 

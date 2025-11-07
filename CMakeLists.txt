@@ -18,8 +18,6 @@ set(STB_IMAGE_DIR ${EXTERNAL_DIR}/stb_image)
 
 add_subdirectory(${GLFW_DIR} EXCLUDE_FROM_ALL)
 add_subdirectory(${CGLM_DIR} EXCLUDE_FROM_ALL)
-
-add_library(glad STATIC ${GLAD_DIR}/src/glad.c)
-target_include_directories(glad PUBLIC ${GLAD_DIR}/include)
+add_subdirectory(${GLAD_DIR} EXCLUDE_FROM_ALL)
 
 add_subdirectory(${DEMOS_DIR})

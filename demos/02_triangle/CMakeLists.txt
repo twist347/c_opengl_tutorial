@@ -1,0 +1,11 @@
+set(D01 01_triangle)
+add_executable(${D01} 01_triangle.c)
+target_compile_definitions(${D01} PRIVATE GLFW_INCLUDE_NONE)
+target_link_libraries(${D01} PRIVATE glad glfw OpenGL::GL)
+target_compile_options(${D01} PRIVATE -Wall -Wextra -Wpedantic)
+
+set(D02 02_triangle_refactoring)
+add_executable(${D02} 02_triangle_refactoring.c)
+target_compile_definitions(${D02} PRIVATE GLFW_INCLUDE_NONE)
+target_link_libraries(${D02} PRIVATE glad glfw OpenGL::GL)
+target_compile_options(${D02} PRIVATE -Wall -Wextra -Wpedantic)
