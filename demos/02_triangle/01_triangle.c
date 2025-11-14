@@ -10,7 +10,7 @@ creating a triangle via opengl
 
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
-#define SCREEN_TITLE "01_triangle"
+#define SCREEN_TITLE __FILE__
 
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3

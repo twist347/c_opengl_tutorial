@@ -1,5 +1,5 @@
 /*
-creating a triangle via opengl. refactoring
+draw rectangle using 2 triangles
 */
 
 #include <stdio.h>
@@ -86,17 +86,27 @@ int main(void) {
     }
 
     const vertex_t vertices[] = {
-        {.pos = {-0.5f, -0.5f, 0.f}}, // left
-        {.pos = {0.5f, -0.5f, 0.f}},  // right
-        {.pos = {0.f, 0.5f, 0.f}}     // top
+        {.pos = {0.5f, 0.5f, 0.f}},
+        {.pos = {0.5f, -0.5f, 0.f}},
+        {.pos = {-0.5f, -0.5f, 0.f}},
+        {.pos = {-0.5f, 0.5f, 0.f}}
     };
 
-    GLuint VBO, VAO;
+    const GLuint indices[] = {
+        0, 1, 3,
+        1, 2, 3
+    };
+
+    GLuint VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, pos));
@@ -106,6 +116,8 @@ int main(void) {
     glBindVertexArray(0);
 
     glClearColor(1.f, 0.f, 0.f, 1.f);
+
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
@@ -117,6 +129,7 @@ int main(void) {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 
 cleanup:
     if (shader_program) {
@@ -283,8 +296,9 @@ static void render(GLuint shader_program, GLuint VAO, GLFWwindow *window) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(shader_program);
+
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
 }

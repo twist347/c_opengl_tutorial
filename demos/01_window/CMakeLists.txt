@@ -1,5 +1,13 @@
-set(D01 01_window)
-add_executable(${D01} 01_window.c)
-target_compile_definitions(${D01} PRIVATE GLFW_INCLUDE_NONE)
-target_link_libraries(${D01} PRIVATE glad glfw OpenGL::GL)
-target_compile_options(${D01} PRIVATE -Wall -Wextra -Wpedantic)
+set(DEMO_SOURCES
+        01_window.c
+)
+
+foreach (src ${DEMO_SOURCES})
+    get_filename_component(target ${src} NAME_WE)
+
+    add_executable(${target} ${src})
+    target_compile_definitions(${target} PRIVATE GLFW_INCLUDE_NONE)
+    target_link_libraries(${target} PRIVATE glad glfw OpenGL::GL)
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+endforeach ()
+

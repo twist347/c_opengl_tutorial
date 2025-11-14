@@ -1,5 +1,5 @@
 /*
-creating a triangle via opengl. refactoring
+draw two triangles using two different VAOs and VBOs
 */
 
 #include <stdio.h>
@@ -40,7 +40,7 @@ static GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader
 
 static GLuint build_program(const char *vertex_shader_src, const char *fragment_shader_src);
 
-static void render(GLuint shader_program, GLuint VAO, GLFWwindow *window);
+static void render(GLuint shader_program, const GLuint *VAOs, GLFWwindow *window);
 
 static const char *vertex_shader_source =
         "#version 330 core\n"
@@ -85,20 +85,31 @@ int main(void) {
         goto cleanup;
     }
 
-    const vertex_t vertices[] = {
-        {.pos = {-0.5f, -0.5f, 0.f}}, // left
-        {.pos = {0.5f, -0.5f, 0.f}},  // right
-        {.pos = {0.f, 0.5f, 0.f}}     // top
+    const vertex_t first_triangle_vertices[] = {
+        {.pos = {-0.9f, -0.5f, 0.f}}, // left
+        {.pos = {-0.f, -0.5f, 0.f}},  // right
+        {.pos = {-0.45f, 0.5f, 0.f}} // top
+    };
+    
+    const vertex_t second_triangle_vertices[] = {
+        {.pos = {0.f, -0.5f, 0.f}}, // left
+        {.pos = {0.9f, -0.5f, 0.f}},  // right
+        {.pos = {0.45f, 0.5f, 0.f}} // top
     };
 
-    GLuint VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    GLuint VBOs[2], VAOs[2];
+    glGenVertexArrays(2, VAOs);
+    glGenBuffers(2, VBOs);
 
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindVertexArray(VAOs[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(first_triangle_vertices), first_triangle_vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, pos));
+    glEnableVertexAttribArray(0);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindVertexArray(VAOs[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(second_triangle_vertices), second_triangle_vertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, pos));
     glEnableVertexAttribArray(0);
 
@@ -110,13 +121,13 @@ int main(void) {
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
 
-        render(shader_program, VAO, window);
+        render(shader_program, VAOs, window);
 
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(2, VAOs);
+    glDeleteBuffers(2, VBOs);
 
 cleanup:
     if (shader_program) {
@@ -279,11 +290,15 @@ cleanup:
     return program;
 }
 
-static void render(GLuint shader_program, GLuint VAO, GLFWwindow *window) {
+static void render(GLuint shader_program, const GLuint *VAOs, GLFWwindow *window) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(shader_program);
-    glBindVertexArray(VAO);
+
+    glBindVertexArray(VAOs[0]);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glBindVertexArray(VAOs[1]);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     glfwSwapBuffers(window);

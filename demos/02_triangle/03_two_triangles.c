@@ -1,5 +1,5 @@
 /*
-creating a triangle via opengl. refactoring
+draw 2 triangles using glDrawArrays and vertices data
 */
 
 #include <stdio.h>
@@ -86,9 +86,15 @@ int main(void) {
     }
 
     const vertex_t vertices[] = {
-        {.pos = {-0.5f, -0.5f, 0.f}}, // left
-        {.pos = {0.5f, -0.5f, 0.f}},  // right
-        {.pos = {0.f, 0.5f, 0.f}}     // top
+        // first
+        {.pos = {-0.9f, -0.5f, 0.f}}, // left
+        {.pos = {-0.f, -0.5f, 0.f}}, // right
+        {.pos = {-0.45f, 0.5f, 0.f}}, // top
+
+        // second
+        {.pos = {0.f, -0.5f, 0.f}}, // left
+        {.pos = {0.9f, -0.5f, 0.f}}, // right
+        {.pos = {0.45f, 0.5f, 0.f}} // top
     };
 
     GLuint VBO, VAO;
@@ -284,7 +290,7 @@ static void render(GLuint shader_program, GLuint VAO, GLFWwindow *window) {
 
     glUseProgram(shader_program);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glfwSwapBuffers(window);
 }

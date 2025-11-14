@@ -1,5 +1,5 @@
 /*
-creating a triangle via opengl. refactoring
+pos and color in struct for each triangle vertex
 */
 
 #include <stdio.h>
@@ -20,6 +20,7 @@ creating a triangle via opengl. refactoring
 
 typedef struct {
     GLfloat pos[3];
+    GLfloat color[3];
 } vertex_t;
 
 static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -46,18 +47,23 @@ static const char *vertex_shader_source =
         "#version 330 core\n"
 
         "layout (location = 0) in vec3 a_pos;\n"
+        "layout (location = 1) in vec3 a_color;\n"
+
+        "out vec3 color;\n"
 
         "void main() {\n"
         "    gl_Position = vec4(a_pos, 1.0);\n"
+        "    color = a_color;\n"
         "}\n";
 
 static const char *fragment_shader_source =
         "#version 330 core\n"
 
         "out vec4 frag_color;\n"
+        "in vec3 color;\n"
 
         "void main() {\n"
-        "   frag_color = vec4(0.0, 0.0, 1.0, 1.0);\n"
+        "   frag_color = vec4(color, 1.0);\n"
         "}\n";
 
 int main(void) {
@@ -86,9 +92,9 @@ int main(void) {
     }
 
     const vertex_t vertices[] = {
-        {.pos = {-0.5f, -0.5f, 0.f}}, // left
-        {.pos = {0.5f, -0.5f, 0.f}},  // right
-        {.pos = {0.f, 0.5f, 0.f}}     // top
+        {.pos = {-0.5f, -0.5f, 0.f}, .color = {1.f, 0.f, 0.f}}, // left
+        {.pos = {0.5f, -0.5f, 0.f}, .color = {0.f, 1.f, 0.f}},  // right
+        {.pos = {0.f, 0.5f, 0.f}, .color = {0.f, 0.f, 1.f}}     // top
     };
 
     GLuint VBO, VAO;
@@ -99,13 +105,17 @@ int main(void) {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, pos));
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, color));
+    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    glClearColor(1.f, 0.f, 0.f, 1.f);
+    glClearColor(1.f, 1.f, 1.f, 1.f);
 
     while (!glfwWindowShouldClose(window)) {
         process_input(window);

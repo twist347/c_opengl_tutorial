@@ -1,11 +1,17 @@
-set(D01 01_triangle)
-add_executable(${D01} 01_triangle.c)
-target_compile_definitions(${D01} PRIVATE GLFW_INCLUDE_NONE)
-target_link_libraries(${D01} PRIVATE glad glfw OpenGL::GL)
-target_compile_options(${D01} PRIVATE -Wall -Wextra -Wpedantic)
+set(DEMO_SOURCES
+        01_triangle.c
+        02_triangle_refactoring.c
+        03_two_triangles.c
+        04_two_triangles.c
+        05_rectangle.c
+        06_triangle_multicolor.c
+)
 
-set(D02 02_triangle_refactoring)
-add_executable(${D02} 02_triangle_refactoring.c)
-target_compile_definitions(${D02} PRIVATE GLFW_INCLUDE_NONE)
-target_link_libraries(${D02} PRIVATE glad glfw OpenGL::GL)
-target_compile_options(${D02} PRIVATE -Wall -Wextra -Wpedantic)
+foreach (src ${DEMO_SOURCES})
+    get_filename_component(target ${src} NAME_WE)
+
+    add_executable(${target} ${src})
+    target_compile_definitions(${target} PRIVATE GLFW_INCLUDE_NONE)
+    target_link_libraries(${target} PRIVATE glad glfw OpenGL::GL)
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+endforeach ()

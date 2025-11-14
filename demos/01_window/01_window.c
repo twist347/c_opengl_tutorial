@@ -10,7 +10,7 @@ creating a window using glfw and glad for opengl
 
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
-#define SCREEN_TITLE "01_window"
+#define SCREEN_TITLE __FILE__
 
 #define OPENGL_MAJOR_VERSION 3
 #define OPENGL_MINOR_VERSION 3
