@@ -1,4 +1,4 @@
-set(DEMO_SOURCES
+set(BUFFER_DEMO_SOURCES
         01_triangle.c
         02_triangle_refactoring.c
         03_two_triangles.c
@@ -7,11 +7,11 @@ set(DEMO_SOURCES
         06_triangle_multicolor.c
 )
 
-foreach (src ${DEMO_SOURCES})
+foreach (src ${BUFFER_DEMO_SOURCES})
     get_filename_component(target ${src} NAME_WE)
 
     add_executable(${target} ${src})
     target_compile_definitions(${target} PRIVATE GLFW_INCLUDE_NONE)
-    target_link_libraries(${target} PRIVATE glad glfw OpenGL::GL)
+    target_link_libraries(${target} PRIVATE glad glfw OpenGL::GL m)
     target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
 endforeach ()

@@ -7,7 +7,7 @@ foreach (src ${DEMO_SOURCES})
 
     add_executable(${target} ${src})
     target_compile_definitions(${target} PRIVATE GLFW_INCLUDE_NONE)
-    target_link_libraries(${target} PRIVATE glad glfw OpenGL::GL)
+    target_link_libraries(${target} PRIVATE glad glfw OpenGL::GL m)
     target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
 endforeach ()
 
