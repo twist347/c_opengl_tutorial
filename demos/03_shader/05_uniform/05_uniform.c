@@ -1,8 +1,8 @@
 /*
-pos and color in struct for each triangle vertex
+moving and scaling triangle using keys
+sending offset(up, down, left, right) and scale(q, e) using uniforms
 */
 
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "glad/glad.h"
@@ -20,14 +20,20 @@ pos and color in struct for each triangle vertex
 #define VERTEX_SHADER_SRC     "shaders/shader.vert"
 #define FRAGMENT_SHADER_SRC   "shaders/shader.frag"
 
+#define MOVE_SPEED     0.01f
+#define SCALE_SPEED    0.01f
+
 typedef struct {
     GLfloat pos[3];
-    GLfloat color[3];
 } vertex_t;
 
 static void process_input(GLFWwindow *window);
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO);
+static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO, GLint loc_time, GLint loc_offset, GLint loc_scale);
+
+static float offset_x = 0.f;
+static float offset_y = 0.f;
+static float scale = 1.f;
 
 int main(void) {
     int exit_code = EXIT_SUCCESS;
@@ -49,9 +55,9 @@ int main(void) {
     }
 
     const vertex_t vertices[] = {
-        {.pos = {-0.5f, -0.5f, 0.f}, .color = {1.f, 0.f, 0.f}}, // left
-        {.pos = {0.5f, -0.5f, 0.f}, .color = {0.f, 1.f, 0.f}}, // right
-        {.pos = {0.f, 0.5f, 0.f}, .color = {0.f, 0.f, 1.f}} // top
+        {.pos = {-0.5f, -0.5f, 0.f}}, // left
+        {.pos = {0.5f, -0.5f, 0.f}},  // right
+        {.pos = {0.f, 0.5f, 0.f}} // top
     };
 
     GLuint VAO = 0, VBO = 0;
@@ -66,18 +72,20 @@ int main(void) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, pos));
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, color));
-    glEnableVertexAttribArray(1);
-
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     glClearColor(1.f, 1.f, 1.f, 1.f);
 
+    glUseProgram(shader_program);
+    const GLint loc_time = glGetUniformLocation(shader_program, "time");
+    const GLint loc_offset = glGetUniformLocation(shader_program, "offset");
+    const GLint loc_scale = glGetUniformLocation(shader_program, "scale");
+
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
 
-        render(window, shader_program, VAO);
+        render(window, shader_program, VAO, loc_time, loc_offset, loc_scale);
 
         glfwPollEvents();
     }
@@ -101,12 +109,40 @@ static void process_input(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        offset_x -= MOVE_SPEED;
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        offset_x += MOVE_SPEED;
+    }
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        offset_y += MOVE_SPEED;
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        offset_y -= MOVE_SPEED;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        scale -= SCALE_SPEED;
+    }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        scale += SCALE_SPEED;
+    }
 }
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO) {
+static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO, GLint loc_time, GLint loc_offset, GLint loc_scale) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(shader_program);
+
+    const float cur_time = (float) glfwGetTime();
+    glUniform1f(loc_time, cur_time);
+
+    glUniform2f(loc_offset, offset_x, offset_y);
+
+    glUniform1f(loc_scale, scale);
+
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 

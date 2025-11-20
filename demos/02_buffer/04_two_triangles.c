@@ -4,7 +4,6 @@ draw two triangles using two different VAOs and VBOs
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -40,7 +39,7 @@ static GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader
 
 static GLuint build_program(const char *vertex_shader_src, const char *fragment_shader_src);
 
-static void render(GLuint shader_program, const GLuint *VAOs, GLFWwindow *window);
+static void render(GLFWwindow *window, GLuint shader_program, const GLuint *VAOs);
 
 static const char *vertex_shader_source =
         "#version 330 core\n"
@@ -97,7 +96,7 @@ int main(void) {
         {.pos = {0.45f, 0.5f, 0.f}} // top
     };
 
-    GLuint VBOs[2], VAOs[2];
+    GLuint VAOs[2] = {0}, VBOs[2] = {0};
     glGenVertexArrays(2, VAOs);
     glGenBuffers(2, VBOs);
 
@@ -121,7 +120,7 @@ int main(void) {
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
 
-        render(shader_program, VAOs, window);
+        render(window, shader_program, VAOs);
 
         glfwPollEvents();
     }
@@ -290,7 +289,7 @@ cleanup:
     return program;
 }
 
-static void render(GLuint shader_program, const GLuint *VAOs, GLFWwindow *window) {
+static void render(GLFWwindow *window, GLuint shader_program, const GLuint *VAOs) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(shader_program);

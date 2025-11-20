@@ -1,9 +1,12 @@
 /*
-pos and color in struct for each triangle vertex
+throbbing triangle
+sending time using uniform
 */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
+#include <math.h>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -22,12 +25,11 @@ pos and color in struct for each triangle vertex
 
 typedef struct {
     GLfloat pos[3];
-    GLfloat color[3];
 } vertex_t;
 
 static void process_input(GLFWwindow *window);
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO);
+static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO, GLint loc_time);
 
 int main(void) {
     int exit_code = EXIT_SUCCESS;
@@ -49,9 +51,9 @@ int main(void) {
     }
 
     const vertex_t vertices[] = {
-        {.pos = {-0.5f, -0.5f, 0.f}, .color = {1.f, 0.f, 0.f}}, // left
-        {.pos = {0.5f, -0.5f, 0.f}, .color = {0.f, 1.f, 0.f}}, // right
-        {.pos = {0.f, 0.5f, 0.f}, .color = {0.f, 0.f, 1.f}} // top
+        {.pos = {-0.5f, -0.5f, 0.f}}, // left
+        {.pos = {0.5f, -0.5f, 0.f}}, // right
+        {.pos = {0.f, 0.5f, 0.f}} // top
     };
 
     GLuint VAO = 0, VBO = 0;
@@ -66,18 +68,18 @@ int main(void) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, pos));
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, color));
-    glEnableVertexAttribArray(1);
-
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     glClearColor(1.f, 1.f, 1.f, 1.f);
 
+    glUseProgram(shader_program);
+    const GLint loc_time = glGetUniformLocation(shader_program, "time");
+
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
 
-        render(window, shader_program, VAO);
+        render(window, shader_program, VAO, loc_time);
 
         glfwPollEvents();
     }
@@ -103,10 +105,14 @@ static void process_input(GLFWwindow *window) {
     }
 }
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO) {
+static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO, GLint loc_time) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(shader_program);
+
+    const float cur_time = (float) glfwGetTime();
+    glUniform1f(loc_time, cur_time);
+
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 

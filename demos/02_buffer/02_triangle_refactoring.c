@@ -4,7 +4,6 @@ creating a triangle via opengl. refactoring
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -40,7 +39,7 @@ static GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader
 
 static GLuint build_program(const char *vertex_shader_src, const char *fragment_shader_src);
 
-static void render(GLuint shader_program, GLuint VAO, GLFWwindow *window);
+static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO);
 
 static const char *vertex_shader_source =
         "#version 330 core\n"
@@ -87,11 +86,11 @@ int main(void) {
 
     const vertex_t vertices[] = {
         {.pos = {-0.5f, -0.5f, 0.f}}, // left
-        {.pos = {0.5f, -0.5f, 0.f}},  // right
-        {.pos = {0.f, 0.5f, 0.f}}     // top
+        {.pos = {0.5f, -0.5f, 0.f}}, // right
+        {.pos = {0.f, 0.5f, 0.f}} // top
     };
 
-    GLuint VBO, VAO;
+    GLuint VAO = 0, VBO = 0;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
@@ -110,7 +109,7 @@ int main(void) {
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
 
-        render(shader_program, VAO, window);
+        render(window, shader_program, VAO);
 
         glfwPollEvents();
     }
@@ -279,7 +278,7 @@ cleanup:
     return program;
 }
 
-static void render(GLuint shader_program, GLuint VAO, GLFWwindow *window) {
+static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(shader_program);

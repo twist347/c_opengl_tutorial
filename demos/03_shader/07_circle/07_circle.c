@@ -1,8 +1,7 @@
 /*
-pos and color in struct for each triangle vertex
+draw a circle using fragment shader
 */
 
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "glad/glad.h"
@@ -20,6 +19,8 @@ pos and color in struct for each triangle vertex
 #define VERTEX_SHADER_SRC     "shaders/shader.vert"
 #define FRAGMENT_SHADER_SRC   "shaders/shader.frag"
 
+#define SEGMENTS 64
+
 typedef struct {
     GLfloat pos[3];
     GLfloat color[3];
@@ -27,7 +28,11 @@ typedef struct {
 
 static void process_input(GLFWwindow *window);
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO);
+static void render(
+    GLFWwindow *window,
+    GLuint shader_program, GLuint VAO, GLuint EBO,
+    GLint loc_center, GLint loc_radius
+);
 
 int main(void) {
     int exit_code = EXIT_SUCCESS;
@@ -49,19 +54,29 @@ int main(void) {
     }
 
     const vertex_t vertices[] = {
-        {.pos = {-0.5f, -0.5f, 0.f}, .color = {1.f, 0.f, 0.f}}, // left
-        {.pos = {0.5f, -0.5f, 0.f}, .color = {0.f, 1.f, 0.f}}, // right
-        {.pos = {0.f, 0.5f, 0.f}, .color = {0.f, 0.f, 1.f}} // top
+        {.pos = {-0.5f, -0.5f}, .color = {1.f, 0.f, 0.f}},
+        {.pos = {0.5f, -0.5f}, .color = {1.f, 0.f, 0.f}},
+        {.pos = {0.5f, 0.5f}, .color = {1.f, 0.f, 0.f}},
+        {.pos = {-0.5f, 0.5f}, .color = {1.f, 0.f, 0.f}},
     };
 
-    GLuint VAO = 0, VBO = 0;
+    const GLuint indices[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+
+    GLuint VAO = 0, VBO = 0, EBO = 0;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, pos));
     glEnableVertexAttribArray(0);
@@ -74,10 +89,14 @@ int main(void) {
 
     glClearColor(1.f, 1.f, 1.f, 1.f);
 
+    glUseProgram(shader_program);
+    const GLint loc_center = glGetUniformLocation(shader_program, "center");
+    const GLint loc_radius = glGetUniformLocation(shader_program, "radius");
+
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
 
-        render(window, shader_program, VAO);
+        render(window, shader_program, VAO, EBO, loc_center, loc_radius);
 
         glfwPollEvents();
     }
@@ -103,12 +122,21 @@ static void process_input(GLFWwindow *window) {
     }
 }
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO) {
+static void render(
+    GLFWwindow *window,
+    GLuint shader_program, GLuint VAO, GLuint EBO,
+    GLint loc_center, GLint loc_radius
+) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(shader_program);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    glUniform2f(loc_center, 0.f, 0.f);
+    glUniform1f(loc_radius, 0.25f);
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
 }

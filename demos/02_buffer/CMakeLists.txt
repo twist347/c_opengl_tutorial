@@ -4,7 +4,6 @@ set(BUFFER_DEMO_SOURCES
         03_two_triangles.c
         04_two_triangles.c
         05_rectangle.c
-        06_triangle_multicolor.c
 )
 
 foreach (src ${BUFFER_DEMO_SOURCES})

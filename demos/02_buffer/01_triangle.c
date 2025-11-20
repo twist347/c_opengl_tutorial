@@ -125,7 +125,7 @@ int main(void) {
         0.f, 0.5f, 0.f     // top
     };
 
-    GLuint VBO, VAO;
+    GLuint VAO = 0, VBO = 0;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 

@@ -1,9 +1,10 @@
 /*
-pos and color in struct for each triangle vertex
+draw a circle using GL_TRIANGLE_FAN
 */
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <stdbool.h>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -20,6 +21,8 @@ pos and color in struct for each triangle vertex
 #define VERTEX_SHADER_SRC     "shaders/shader.vert"
 #define FRAGMENT_SHADER_SRC   "shaders/shader.frag"
 
+#define SEGMENTS 64
+
 typedef struct {
     GLfloat pos[3];
     GLfloat color[3];
@@ -28,6 +31,8 @@ typedef struct {
 static void process_input(GLFWwindow *window);
 
 static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO);
+
+static bool enable_polygon_mode = false;
 
 int main(void) {
     int exit_code = EXIT_SUCCESS;
@@ -48,11 +53,36 @@ int main(void) {
         goto cleanup;
     }
 
-    const vertex_t vertices[] = {
-        {.pos = {-0.5f, -0.5f, 0.f}, .color = {1.f, 0.f, 0.f}}, // left
-        {.pos = {0.5f, -0.5f, 0.f}, .color = {0.f, 1.f, 0.f}}, // right
-        {.pos = {0.f, 0.5f, 0.f}, .color = {0.f, 0.f, 1.f}} // top
-    };
+    const float cx = 0.f, cy = 0.f;
+    const float r = 0.5f;
+
+    vertex_t vertices[SEGMENTS + 2] = {0};
+
+    vertices[0].pos[0] = cx;
+    vertices[0].pos[1] = cy;
+    vertices[0].pos[2] = 0.f;
+    vertices[0].color[0] = 1.f;
+    vertices[0].color[1] = 0.f;
+    vertices[0].color[2] = 0.f;
+
+    static const float double_pi = 2.f * (float) M_PI;
+
+    for (int i = 0; i <= SEGMENTS; ++i) {
+        const float segment = (float) i / (float) SEGMENTS; // [0.0 ... 1.0]
+        const float angle = segment * double_pi;
+
+        const float x = cx + r * cosf(angle);
+        const float y = cy + r * sinf(angle);
+
+        const int idx = i + 1;
+        vertices[idx].pos[0] = x;
+        vertices[idx].pos[1] = y;
+        vertices[idx].pos[2] = 0.f;
+
+        vertices[idx].color[0] = 1.f;
+        vertices[idx].color[1] = 0.f;
+        vertices[idx].color[2] = 0.f;
+    }
 
     GLuint VAO = 0, VBO = 0;
     glGenVertexArrays(1, &VAO);
@@ -101,14 +131,25 @@ static void process_input(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
+
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+        enable_polygon_mode = !enable_polygon_mode;
+    }
 }
 
 static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO) {
     glClear(GL_COLOR_BUFFER_BIT);
 
+    if (enable_polygon_mode) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    } else {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
     glUseProgram(shader_program);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glDrawArrays(GL_TRIANGLE_FAN, 0, SEGMENTS + 2);
 
     glfwSwapBuffers(window);
 }

@@ -1,2 +1,6 @@
-add_library(ogl_util STATIC ogl_util.c)
-target_include_directories(ogl_util PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+set(T ogt_util)
+add_library(${T} STATIC ogt_util.c)
+target_include_directories(${T} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${T} PRIVATE GLFW_INCLUDE_NONE)
+target_link_libraries(${T} PRIVATE glad glfw OpenGL::GL)
+target_compile_options(${T} PRIVATE -Wall -Wextra -Wpedantic)
