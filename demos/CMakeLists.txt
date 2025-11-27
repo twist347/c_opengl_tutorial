@@ -1,3 +1,4 @@
 add_subdirectory(01_window)
 add_subdirectory(02_buffer)
 add_subdirectory(03_shader)
+add_subdirectory(04_texture)

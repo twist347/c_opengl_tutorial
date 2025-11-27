@@ -14,6 +14,6 @@ void main() {
    if (dist <= radius) {
       frag_color = vec4(color, 1.0);
    } else {
-      frag_color = vec4(1.0);
+      discard;
    }
 }
