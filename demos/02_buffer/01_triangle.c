@@ -101,13 +101,13 @@ int main(void) {
         return EXIT_FAILURE;
     }
 
-    const GLuint shader_program = glCreateProgram();
-    glAttachShader(shader_program, vertex_shader);
-    glAttachShader(shader_program, fragment_shader);
-    glLinkProgram(shader_program);
-    glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
+    const GLuint shader = glCreateProgram();
+    glAttachShader(shader, vertex_shader);
+    glAttachShader(shader, fragment_shader);
+    glLinkProgram(shader);
+    glGetProgramiv(shader, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetProgramInfoLog(shader_program, LOG_LEN, NULL, info_log);
+        glGetProgramInfoLog(shader, LOG_LEN, NULL, info_log);
         fprintf(stderr, "[ERROR]: failed to link shader program: %s\n", info_log);
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);
@@ -147,7 +147,7 @@ int main(void) {
 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shader_program);
+        glUseProgram(shader);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -158,7 +158,7 @@ int main(void) {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 
-    glDeleteProgram(shader_program);
+    glDeleteProgram(shader);
 
     glfwDestroyWindow(window);
     glfwTerminate();

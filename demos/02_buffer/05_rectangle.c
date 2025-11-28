@@ -35,11 +35,11 @@ static void print_gl_info(void);
 
 static GLuint compile_shader(GLenum type, const char *source);
 
-static GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader);
+static GLuint create_shader(GLuint vertex_shader, GLuint fragment_shader);
 
-static GLuint build_program(const char *vertex_shader_src, const char *fragment_shader_src);
+static GLuint build_shader(const char *vertex_shader_src, const char *fragment_shader_src);
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO);
+static void render(GLFWwindow *window, GLuint shader, GLuint VAO);
 
 static const char *vertex_shader_source =
         "#version 330 core\n"
@@ -61,7 +61,7 @@ static const char *fragment_shader_source =
 
 int main(void) {
     int exit_code = EXIT_SUCCESS;
-    GLuint shader_program = 0;
+    GLuint shader = 0;
 
     GLFWwindow *window = create_window_and_context(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
     if (!window) {
@@ -78,8 +78,8 @@ int main(void) {
 
     print_gl_info();
 
-    shader_program = build_program(vertex_shader_source, fragment_shader_source);
-    if (!shader_program) {
+    shader = build_shader(vertex_shader_source, fragment_shader_source);
+    if (!shader) {
         exit_code = EXIT_FAILURE;
         goto cleanup;
     }
@@ -121,7 +121,7 @@ int main(void) {
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
 
-        render(window, shader_program, VAO);
+        render(window, shader, VAO);
 
         glfwPollEvents();
     }
@@ -131,8 +131,8 @@ int main(void) {
     glDeleteBuffers(1, &EBO);
 
 cleanup:
-    if (shader_program) {
-        glDeleteProgram(shader_program);
+    if (shader) {
+        glDeleteProgram(shader);
     }
     if (window) {
         glfwDestroyWindow(window);
@@ -243,7 +243,7 @@ static GLuint compile_shader(GLenum type, const char *source) {
     return shader;
 }
 
-static GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader) {
+static GLuint create_shader(GLuint vertex_shader, GLuint fragment_shader) {
     if (!vertex_shader || !fragment_shader) {
         return 0;
     }
@@ -266,7 +266,7 @@ static GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader
     return program;
 }
 
-static GLuint build_program(const char *vertex_shader_src, const char *fragment_shader_src) {
+static GLuint build_shader(const char *vertex_shader_src, const char *fragment_shader_src) {
     GLuint vertex_shader = 0, fragment_shader = 0, program = 0;
 
     vertex_shader = compile_shader(GL_VERTEX_SHADER, vertex_shader_src);
@@ -279,7 +279,7 @@ static GLuint build_program(const char *vertex_shader_src, const char *fragment_
         goto cleanup;
     }
 
-    program = create_shader_program(vertex_shader, fragment_shader);
+    program = create_shader(vertex_shader, fragment_shader);
 
 cleanup:
     if (fragment_shader) {
@@ -291,10 +291,10 @@ cleanup:
     return program;
 }
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO) {
+static void render(GLFWwindow *window, GLuint shader, GLuint VAO) {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(shader_program);
+    glUseProgram(shader);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

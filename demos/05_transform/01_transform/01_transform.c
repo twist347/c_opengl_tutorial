@@ -1,15 +1,9 @@
-/*
-throbbing triangle
-sending time using uniform
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
-#include <math.h>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
+#include "cglm/cglm.h"
 
 #include "ogt_util.h"
 
@@ -24,12 +18,13 @@ sending time using uniform
 #define FRAGMENT_SHADER_SRC   "shaders/shader.frag"
 
 typedef struct {
-    GLfloat pos[3];
+    vec3 pos;
+    ogt_color_t color;
 } vertex_t;
 
 static void process_input(GLFWwindow *window);
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO, GLint loc_time);
+static void render(GLFWwindow *window, GLuint shader, GLuint VAO);
 
 int main(void) {
     int exit_code = EXIT_SUCCESS;
@@ -51,35 +46,55 @@ int main(void) {
     }
 
     const vertex_t vertices[] = {
-        {.pos = {-0.5f, -0.5f, 0.f}}, // left
-        {.pos = {0.5f, -0.5f, 0.f}}, // right
-        {.pos = {0.f, 0.5f, 0.f}} // top
+        {.pos = {0.5f, 0.5f, 0.f}, .color = OGT_RED}, // top right
+        {.pos = {0.5f, -0.5f, 0.f}, .color = OGT_GREEN,}, // bottom right
+        {.pos = {-0.5f, -0.5f, 0.f}, .color = OGT_BLUE}, // bottom left
+        {.pos = {-0.5f, 0.5f, 0.f}, .color = OGT_YELLOW} // top left
     };
 
-    GLuint VAO = 0, VBO = 0;
+    const GLuint indices[] = {
+        0, 1, 3, // first triangle
+        1, 2, 3 // second triangle
+    };
+
+    GLuint VAO = 0, VBO = 0, EBO = 0;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, pos));
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vertex_t), (void *) offsetof(vertex_t, color));
+    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    glClearColor(1.f, 1.f, 1.f, 1.f);
+    mat4 trans;
+    glm_mat4_identity(trans);
+    glm_translate(trans, (vec3){-0.5f, 0.5f, 0.f});
+    glm_rotate(trans, glm_rad(45.f), (vec3){0.f, 0.f, 1.f});
+    glm_scale(trans, (vec3){0.5f, 0.5f, 0.5f});
 
     glUseProgram(shader);
-    const GLint loc_time = glGetUniformLocation(shader, "time");
+    glUniformMatrix4fv(glGetUniformLocation(shader, "trans"), 1, GL_FALSE, (float *) trans);
+
+    glClearColor(1.f, 1.f, 1.f, 1.f);
 
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
 
-        render(window, shader, VAO, loc_time);
+        render(window, shader, VAO);
 
         glfwPollEvents();
     }
@@ -105,16 +120,13 @@ static void process_input(GLFWwindow *window) {
     }
 }
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO, GLint loc_time) {
+static void render(GLFWwindow *window, GLuint shader, GLuint VAO) {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(shader_program);
-
-    const float cur_time = (float) glfwGetTime();
-    glUniform1f(loc_time, cur_time);
+    glUseProgram(shader);
 
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
 }

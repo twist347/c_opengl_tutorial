@@ -14,7 +14,7 @@ static void init_viewport(GLFWwindow *window);
 
 static GLuint compile_shader(GLenum type, const char *source);
 
-static GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader);
+static GLuint create_shader(GLuint vertex_shader, GLuint fragment_shader);
 
 static void print_info(void);
 
@@ -22,7 +22,7 @@ static char *ogt_read_file(const char *filepath, size_t *out_size);
 
 static char *ogt_read_file_text(const char *filepath);
 
-GLuint ogt_build_shader_program_src(const char *vertex_shader_src, const char *fragment_shader_src) {
+GLuint ogt_build_shader_src(const char *vertex_shader_src, const char *fragment_shader_src) {
     GLuint vertex_shader = 0, fragment_shader = 0, program = 0;
 
     vertex_shader = compile_shader(GL_VERTEX_SHADER, vertex_shader_src);
@@ -35,7 +35,7 @@ GLuint ogt_build_shader_program_src(const char *vertex_shader_src, const char *f
         goto cleanup;
     }
 
-    program = create_shader_program(vertex_shader, fragment_shader);
+    program = create_shader(vertex_shader, fragment_shader);
 
 cleanup:
     if (fragment_shader) {
@@ -47,7 +47,7 @@ cleanup:
     return program;
 }
 
-GLuint ogt_build_shader_program_path(const char *vertex_shader_path, const char *fragment_shader_path) {
+GLuint ogt_build_shader_path(const char *vertex_shader_path, const char *fragment_shader_path) {
     char *vertex_shader_src = NULL;
     char *fragment_shader_src = NULL;
     GLuint program = 0;
@@ -62,7 +62,7 @@ GLuint ogt_build_shader_program_path(const char *vertex_shader_path, const char 
         goto cleanup;
     }
 
-    program = ogt_build_shader_program_src(vertex_shader_src, fragment_shader_src);
+    program = ogt_build_shader_src(vertex_shader_src, fragment_shader_src);
 
 cleanup:
     if (fragment_shader_src) {
@@ -153,7 +153,7 @@ static GLuint compile_shader(GLenum type, const char *source) {
     return shader;
 }
 
-static GLuint create_shader_program(GLuint vertex_shader, GLuint fragment_shader) {
+static GLuint create_shader(GLuint vertex_shader, GLuint fragment_shader) {
     if (!vertex_shader || !fragment_shader) {
         return 0;
     }

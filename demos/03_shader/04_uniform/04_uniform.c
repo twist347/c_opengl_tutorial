@@ -33,7 +33,7 @@ static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO, GLint 
 
 int main(void) {
     int exit_code = EXIT_SUCCESS;
-    GLuint shader_program = 0;
+    GLuint shader = 0;
 
     GLFWwindow *window = ogt_create_window_and_context(
         SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE,
@@ -44,8 +44,8 @@ int main(void) {
         goto cleanup;
     }
 
-    shader_program = ogt_build_shader_program_path(VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC);
-    if (!shader_program) {
+    shader = ogt_build_shader_path(VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC);
+    if (!shader) {
         exit_code = EXIT_FAILURE;
         goto cleanup;
     }
@@ -73,13 +73,13 @@ int main(void) {
 
     glClearColor(1.f, 1.f, 1.f, 1.f);
 
-    glUseProgram(shader_program);
-    const GLint loc_time = glGetUniformLocation(shader_program, "time");
+    glUseProgram(shader);
+    const GLint loc_time = glGetUniformLocation(shader, "time");
 
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
 
-        render(window, shader_program, VAO, loc_time);
+        render(window, shader, VAO, loc_time);
 
         glfwPollEvents();
     }
@@ -88,8 +88,8 @@ int main(void) {
     glDeleteBuffers(1, &VBO);
 
 cleanup:
-    if (shader_program) {
-        glDeleteProgram(shader_program);
+    if (shader) {
+        glDeleteProgram(shader);
     }
     if (window) {
         glfwDestroyWindow(window);

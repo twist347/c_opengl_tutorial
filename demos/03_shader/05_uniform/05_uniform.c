@@ -37,7 +37,7 @@ static float scale = 1.f;
 
 int main(void) {
     int exit_code = EXIT_SUCCESS;
-    GLuint shader_program = 0;
+    GLuint shader = 0;
 
     GLFWwindow *window = ogt_create_window_and_context(
         SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE,
@@ -48,8 +48,8 @@ int main(void) {
         goto cleanup;
     }
 
-    shader_program = ogt_build_shader_program_path(VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC);
-    if (!shader_program) {
+    shader = ogt_build_shader_path(VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC);
+    if (!shader) {
         exit_code = EXIT_FAILURE;
         goto cleanup;
     }
@@ -77,15 +77,15 @@ int main(void) {
 
     glClearColor(1.f, 1.f, 1.f, 1.f);
 
-    glUseProgram(shader_program);
-    const GLint loc_time = glGetUniformLocation(shader_program, "time");
-    const GLint loc_offset = glGetUniformLocation(shader_program, "offset");
-    const GLint loc_scale = glGetUniformLocation(shader_program, "scale");
+    glUseProgram(shader);
+    const GLint loc_time = glGetUniformLocation(shader, "time");
+    const GLint loc_offset = glGetUniformLocation(shader, "offset");
+    const GLint loc_scale = glGetUniformLocation(shader, "scale");
 
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
 
-        render(window, shader_program, VAO, loc_time, loc_offset, loc_scale);
+        render(window, shader, VAO, loc_time, loc_offset, loc_scale);
 
         glfwPollEvents();
     }
@@ -94,8 +94,8 @@ int main(void) {
     glDeleteBuffers(1, &VBO);
 
 cleanup:
-    if (shader_program) {
-        glDeleteProgram(shader_program);
+    if (shader) {
+        glDeleteProgram(shader);
     }
     if (window) {
         glfwDestroyWindow(window);

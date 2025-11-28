@@ -30,13 +30,13 @@ typedef struct {
 
 static void process_input(GLFWwindow *window);
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO);
+static void render(GLFWwindow *window, GLuint shader, GLuint VAO);
 
 static bool enable_polygon_mode = false;
 
 int main(void) {
     int exit_code = EXIT_SUCCESS;
-    GLuint shader_program = 0;
+    GLuint shader = 0;
 
     GLFWwindow *window = ogt_create_window_and_context(
         SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE,
@@ -47,8 +47,8 @@ int main(void) {
         goto cleanup;
     }
 
-    shader_program = ogt_build_shader_program_path(VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC);
-    if (!shader_program) {
+    shader = ogt_build_shader_path(VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC);
+    if (!shader) {
         exit_code = EXIT_FAILURE;
         goto cleanup;
     }
@@ -107,7 +107,7 @@ int main(void) {
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
 
-        render(window, shader_program, VAO);
+        render(window, shader, VAO);
 
         glfwPollEvents();
     }
@@ -116,8 +116,8 @@ int main(void) {
     glDeleteBuffers(1, &VBO);
 
 cleanup:
-    if (shader_program) {
-        glDeleteProgram(shader_program);
+    if (shader) {
+        glDeleteProgram(shader);
     }
     if (window) {
         glfwDestroyWindow(window);
@@ -137,7 +137,7 @@ static void process_input(GLFWwindow *window) {
     }
 }
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO) {
+static void render(GLFWwindow *window, GLuint shader, GLuint VAO) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     if (enable_polygon_mode) {
@@ -146,7 +146,7 @@ static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
-    glUseProgram(shader_program);
+    glUseProgram(shader);
     glBindVertexArray(VAO);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, SEGMENTS + 2);

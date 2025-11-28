@@ -39,7 +39,7 @@ static GLuint load_texture(const char *filename);
 
 int main(void) {
     int exit_code = EXIT_SUCCESS;
-    GLuint shader_program = 0;
+    GLuint shader = 0;
     GLuint textures[2] = {0};
 
     GLFWwindow *window = ogt_create_window_and_context(
@@ -51,15 +51,15 @@ int main(void) {
         goto cleanup;
     }
 
-    shader_program = ogt_build_shader_program_path(VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC);
-    if (!shader_program) {
+    shader = ogt_build_shader_path(VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC);
+    if (!shader) {
         exit_code = EXIT_FAILURE;
         goto cleanup;
     }
 
-    glUseProgram(shader_program);
-    glUniform1i(glGetUniformLocation(shader_program, "tex0"), 0);
-    glUniform1i(glGetUniformLocation(shader_program, "tex1"), 1);
+    glUseProgram(shader);
+    glUniform1i(glGetUniformLocation(shader, "tex0"), 0);
+    glUniform1i(glGetUniformLocation(shader, "tex1"), 1);
 
     const vertex_t vertices[] = {
         {{0.5f, 0.5f, 0.f}, {1.f, 1.f}}, // top right
@@ -113,7 +113,7 @@ int main(void) {
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
 
-        render(window, shader_program, VAO, textures);
+        render(window, shader, VAO, textures);
 
         glfwPollEvents();
     }
@@ -123,8 +123,8 @@ int main(void) {
     glDeleteVertexArrays(1, &VAO);
 
 cleanup:
-    if (shader_program) {
-        glDeleteProgram(shader_program);
+    if (shader) {
+        glDeleteProgram(shader);
     }
 
     if (textures[1]) {
