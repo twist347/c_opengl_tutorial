@@ -71,10 +71,10 @@ int main(void) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    glClearColor(1.f, 1.f, 1.f, 1.f);
+    glClearColor(0.5f, 0.5f, 0.5f, 1.f);
 
     glUseProgram(shader);
-    const GLint loc_time = glGetUniformLocation(shader, "time");
+    const GLint loc_time = glGetUniformLocation(shader, "u_time");
 
     while (!glfwWindowShouldClose(window)) {
         process_input(window);

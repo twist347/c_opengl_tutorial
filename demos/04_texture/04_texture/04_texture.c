@@ -43,8 +43,9 @@ typedef struct {
 
 static void process_input(GLFWwindow *window);
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO, GLuint texture, GLint mode_loc,
-                   GLint time_loc);
+static void render(
+    GLFWwindow *window, GLuint shader_program, GLuint VAO, GLuint texture, GLint mode_loc, GLint time_loc
+);
 
 static GLuint load_texture(const char *filename);
 
@@ -72,7 +73,7 @@ int main(void) {
     }
 
     glUseProgram(shader);
-    glUniform1i(glGetUniformLocation(shader, "tex0"), 0);
+    glUniform1i(glGetUniformLocation(shader, "u_tex0"), 0);
 
     const vertex_t vertices[] = {
         {.pos = {0.5f, 0.5f, 0.f}, .color = {1.f, 0.f, 0.f}, .tex = {1.f, 1.f}}, // top right
@@ -118,8 +119,8 @@ int main(void) {
     }
 
     glUseProgram(shader);
-    const GLint mode_loc = glGetUniformLocation(shader, "mode");
-    const GLint time_loc = glGetUniformLocation(shader, "time");
+    const GLint mode_loc = glGetUniformLocation(shader, "u_mode");
+    const GLint time_loc = glGetUniformLocation(shader, "u_time");
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
@@ -165,8 +166,9 @@ static void process_input(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS) g_mode = 7;
 }
 
-static void render(GLFWwindow *window, GLuint shader_program, GLuint VAO, GLuint texture, GLint mode_loc,
-                   GLint time_loc) {
+static void render(
+    GLFWwindow *window, GLuint shader_program, GLuint VAO, GLuint texture, GLint mode_loc, GLint time_loc
+) {
     (void) window;
 
     glClear(GL_COLOR_BUFFER_BIT);
@@ -223,14 +225,9 @@ static GLuint load_texture(const char *filename) {
         return 0;
     }
 
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 format,
-                 width, height,
-                 0,
-                 format,
-                 GL_UNSIGNED_BYTE,
-                 data);
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data
+    );
 
     glGenerateMipmap(GL_TEXTURE_2D);
 

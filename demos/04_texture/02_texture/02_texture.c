@@ -57,7 +57,7 @@ int main(void) {
     }
 
     glUseProgram(shader);
-    glUniform1i(glGetUniformLocation(shader, "tex0"), 0);
+    glUniform1i(glGetUniformLocation(shader, "u_tex0"), 0);
 
     const vertex_t vertices[] = {
         {{0.5f, 0.5f, 0.f}, {1.f, 0.f, 0.f}, {1.f, 1.f}}, // top right
@@ -100,7 +100,7 @@ int main(void) {
 
     texture = load_texture(TEXTURE_SRC);
 
-    glClearColor(1.f, 1.f, 1.f, 1.f);
+    glClearColor(0.5f, 0.5f, 0.5f, 1.f);
 
     while (!glfwWindowShouldClose(window)) {
         process_input(window);

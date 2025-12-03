@@ -1,5 +1,7 @@
 set(TRANSFORM_DEMO_SOURCE
     01_transform/01_transform.c
+    02_coordinate_system/02_coordinate_system.c
+    03_coordinate_system/03_coordinate_system.c
 )
 
 foreach (src ${TRANSFORM_DEMO_SOURCE})

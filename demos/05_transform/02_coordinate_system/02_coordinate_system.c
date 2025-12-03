@@ -1,13 +1,9 @@
-/*
-draw a circle using GL_TRIANGLE_FAN
-*/
-
+#include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <stdbool.h>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
+#include "cglm/cglm.h"
 
 #include "ogt_util.h"
 
@@ -21,18 +17,14 @@ draw a circle using GL_TRIANGLE_FAN
 #define VERTEX_SHADER_SRC     "shaders/shader.vert"
 #define FRAGMENT_SHADER_SRC   "shaders/shader.frag"
 
-#define SEGMENTS 64
-
 typedef struct {
-    GLfloat pos[3];
-    GLfloat color[3];
+    vec3 pos;
+    ogt_color_t color;
 } vertex_t;
 
 static void process_input(GLFWwindow *window);
 
 static void render(GLFWwindow *window, GLuint shader, GLuint VAO);
-
-static bool enable_polygon_mode = false;
 
 int main(void) {
     int exit_code = EXIT_SUCCESS;
@@ -53,54 +45,57 @@ int main(void) {
         goto cleanup;
     }
 
-    const float cx = 0.f, cy = 0.f;
-    const float r = 0.5f;
+    const vertex_t vertices[] = {
+        {.pos = {0.5f, 0.5f, 0.f}, .color = OGT_RED}, // top right
+        {.pos = {0.5f, -0.5f, 0.f}, .color = OGT_GREEN,}, // bottom right
+        {.pos = {-0.5f, -0.5f, 0.f}, .color = OGT_BLUE}, // bottom left
+        {.pos = {-0.5f, 0.5f, 0.f}, .color = OGT_YELLOW} // top left
+    };
 
-    vertex_t vertices[SEGMENTS + 2] = {0};
+    const GLuint indices[] = {
+        0, 1, 3, // first triangle
+        1, 2, 3 // second triangle
+    };
 
-    vertices[0].pos[0] = cx;
-    vertices[0].pos[1] = cy;
-    vertices[0].pos[2] = 0.f;
-    vertices[0].color[0] = 1.f;
-    vertices[0].color[1] = 0.f;
-    vertices[0].color[2] = 0.f;
-
-    static const float double_pi = 2.f * (float) M_PI;
-
-    for (int i = 0; i <= SEGMENTS; ++i) {
-        const float segment = (float) i / (float) SEGMENTS; // [0.0 ... 1.0]
-        const float angle = segment * double_pi;
-
-        const float x = cx + r * cosf(angle);
-        const float y = cy + r * sinf(angle);
-
-        const int idx = i + 1;
-        vertices[idx].pos[0] = x;
-        vertices[idx].pos[1] = y;
-        vertices[idx].pos[2] = 0.f;
-
-        vertices[idx].color[0] = 1.f;
-        vertices[idx].color[1] = 0.f;
-        vertices[idx].color[2] = 0.f;
-    }
-
-    GLuint VAO = 0, VBO = 0;
+    GLuint VAO = 0, VBO = 0, EBO = 0;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, pos));
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, color));
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vertex_t), (void *) offsetof(vertex_t, color));
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    mat4 model;
+    glm_mat4_identity(model);
+    glm_rotate(model, glm_rad(-55.f), (vec3){1.f, 0.f, 0.f});
+
+    mat4 view;
+    glm_mat4_identity(view);
+    glm_translate(view, (vec3){0.f, 0.f, -3.f});
+
+    mat4 projection;
+    glm_perspective(glm_rad(45.f), (float) SCREEN_WIDTH / (float) SCREEN_HEIGHT, 0.1f, 100.f, projection);
+
+    glUseProgram(shader);
+
+    glUniformMatrix4fv(glGetUniformLocation(shader, "u_model"), 1, GL_FALSE, (float *) model);
+    glUniformMatrix4fv(glGetUniformLocation(shader, "u_view"), 1, GL_FALSE, (float *) view);
+    glUniformMatrix4fv(glGetUniformLocation(shader, "u_projection"), 1, GL_FALSE, (float *) projection);
 
     glClearColor(0.5f, 0.5f, 0.5f, 1.f);
 
@@ -114,6 +109,7 @@ int main(void) {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 
 cleanup:
     if (shader) {
@@ -131,25 +127,15 @@ static void process_input(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
-
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-        enable_polygon_mode = !enable_polygon_mode;
-    }
 }
 
 static void render(GLFWwindow *window, GLuint shader, GLuint VAO) {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if (enable_polygon_mode) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    } else {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-
     glUseProgram(shader);
-    glBindVertexArray(VAO);
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, SEGMENTS + 2);
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
 }

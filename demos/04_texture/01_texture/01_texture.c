@@ -54,7 +54,7 @@ int main(void) {
     }
 
     glUseProgram(shader);
-    glUniform1i(glGetUniformLocation(shader, "tex0"), 0);
+    glUniform1i(glGetUniformLocation(shader, "u_tex0"), 0);
 
     const vertex_t vertices[] = {
         {.pos = {-0.5f, -0.5f, 0.f}, .tex = {0.f, 0.f}}, // left
@@ -106,7 +106,7 @@ int main(void) {
 
     stbi_image_free(data);
 
-    glClearColor(1.f, 1.f, 1.f, 1.f);
+    glClearColor(0.5f, 0.5f, 0.5f, 1.f);
 
     while (!glfwWindowShouldClose(window)) {
         process_input(window);

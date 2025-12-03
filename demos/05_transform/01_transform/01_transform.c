@@ -87,9 +87,9 @@ int main(void) {
     glm_scale(trans, (vec3){0.5f, 0.5f, 0.5f});
 
     glUseProgram(shader);
-    glUniformMatrix4fv(glGetUniformLocation(shader, "trans"), 1, GL_FALSE, (float *) trans);
+    glUniformMatrix4fv(glGetUniformLocation(shader, "u_trans"), 1, GL_FALSE, (float *) trans);
 
-    glClearColor(1.f, 1.f, 1.f, 1.f);
+    glClearColor(0.5f, 0.5f, 0.5f, 1.f);
 
     while (!glfwWindowShouldClose(window)) {
         process_input(window);
@@ -101,6 +101,7 @@ int main(void) {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 
 cleanup:
     if (shader) {
