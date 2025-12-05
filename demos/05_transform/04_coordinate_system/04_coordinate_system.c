@@ -1,5 +1,6 @@
 /*
-draw spinning cube
+draw spinning cubes
+try to switch rotate and translate
 */
 
 #include <stdio.h>
@@ -29,7 +30,7 @@ typedef struct {
 
 static void process_input(GLFWwindow *window);
 
-static void render(GLFWwindow *window, GLuint shader, GLuint VAO, GLint model_loc);
+static void render(GLFWwindow *window, GLuint shader, GLuint VAO, GLint model_loc, vec3 cubes_pos[], size_t n_cubes);
 
 static bool enable_depth_test = true;
 
@@ -116,6 +117,16 @@ int main(void) {
         22, 23, 20
     };
 
+    vec3 cubes_pos[] = {
+        {0.f, 0.f, 0.f},
+        {2.f, 0.f, 0.f},
+        {-2.f, 0.f, 0.f},
+        {0.f, 2.f, 0.f},
+        {0.f, -2.f, 0.f},
+    };
+
+    const size_t n_cubes = OGT_ARR_LEN(cubes_pos);
+
     GLuint VAO = 0, VBO = 0, EBO = 0;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -140,7 +151,7 @@ int main(void) {
 
     mat4 view;
     glm_mat4_identity(view);
-    glm_translate(view, (vec3){0.f, 0.f, -3.f});
+    glm_translate(view, (vec3){0.f, 0.f, -8.f});
 
     mat4 projection;
     glm_perspective(glm_rad(45.f), (float) SCREEN_WIDTH / (float) SCREEN_HEIGHT, 0.1f, 100.f, projection);
@@ -168,7 +179,7 @@ int main(void) {
             glDisable(GL_DEPTH_TEST);
         }
 
-        render(window, shader, VAO, model_loc);
+        render(window, shader, VAO, model_loc, cubes_pos, n_cubes);
 
         glfwPollEvents();
     }
@@ -199,17 +210,27 @@ static void process_input(GLFWwindow *window) {
     }
 }
 
-static void render(GLFWwindow *window, GLuint shader, GLuint VAO, GLint model_loc) {
+static void render(GLFWwindow *window, GLuint shader, GLuint VAO, GLint model_loc, vec3 cubes_pos[], size_t n_cubes) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(shader);
-    mat4 model;
-    glm_mat4_identity(model);
-    glm_rotate(model, glm_rad(50.f) * (float) glfwGetTime(), (vec3){0.5f, 1.f, 1.f});
-    glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float *) model);
-
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, NULL);
+
+    const float time = (float) glfwGetTime();
+
+    for (size_t i = 0; i < n_cubes; ++i) {
+        mat4 model;
+        glm_mat4_identity(model);
+
+        const float angle = glm_rad(50.f) * time + glm_rad(20.f) * (float) i;
+
+        glm_translate(model, cubes_pos[i]);
+
+        glm_rotate(model, angle, (vec3){0.5f, 1.f, 1.f});
+
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float *) model);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, NULL);
+    }
 
     glfwSwapBuffers(window);
 }

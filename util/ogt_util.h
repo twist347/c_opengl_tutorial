@@ -3,6 +3,8 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
+#define OGT_ARR_LEN(arr)    (sizeof((arr)) / sizeof((arr)[0]))
+
 typedef struct {
     unsigned char r;
     unsigned char g;
