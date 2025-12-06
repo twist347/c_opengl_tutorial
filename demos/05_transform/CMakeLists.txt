@@ -3,7 +3,6 @@ set(TRANSFORM_DEMO_SOURCE
     02_coordinate_system/02_coordinate_system.c
     03_coordinate_system/03_coordinate_system.c
     04_coordinate_system/04_coordinate_system.c
-    05_camera/05_camera.c
 )
 
 foreach (src ${TRANSFORM_DEMO_SOURCE})
