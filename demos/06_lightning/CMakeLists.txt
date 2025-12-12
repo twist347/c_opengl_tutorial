@@ -1,12 +1,8 @@
-set(TRANSFORM_DEMO_SOURCE
-    01_transform/01_transform.c
-    02_coordinate_system/02_coordinate_system.c
-    03_coordinate_system/03_coordinate_system.c
-    04_coordinate_system/04_coordinate_system.c
-    05_camera/05_camera.c
+set(LIGHTNING_DEMO_SOURCE
+    01_colors/01_colors.c
 )
 
-foreach (src ${TRANSFORM_DEMO_SOURCE})
+foreach (src ${LIGHTNING_DEMO_SOURCE})
     get_filename_component(target ${src} NAME_WE)
     get_filename_component(src_dir ${src} DIRECTORY)
 

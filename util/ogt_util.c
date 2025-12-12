@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <math.h>
 
 #define LOG_LEN 1024
 
@@ -21,6 +22,86 @@ static void print_info(void);
 static char *ogt_read_file(const char *filepath, size_t *out_size);
 
 static char *ogt_read_file_text(const char *filepath);
+
+static void ogt_camera_update_vectors(ogt_camera_t *cam);
+
+void ogt_camera_init(ogt_camera_t *cam, vec3 position, float aspect) {
+    glm_vec3_copy(position, cam->pos);
+
+    cam->yaw = -90.f;
+    cam->pitch = 0.f;
+
+    cam->speed = 2.5f;
+    cam->sens = 0.1f;
+
+    cam->fov = 45.f;
+    cam->z_near = 0.1f;
+    cam->z_far = 100.f;
+    cam->aspect = aspect;
+
+    vec3 world_up = {0.f, 1.f, 0.f};
+    glm_vec3_copy(world_up, cam->world_up);
+
+    ogt_camera_update_vectors(cam);
+}
+
+void ogt_camera_set_perspective(ogt_camera_t *cam, float fov, float z_near, float z_far, float aspect) {
+    cam->fov = fov;
+    cam->z_near = z_near;
+    cam->z_far = z_far;
+    cam->aspect = aspect;
+}
+
+void ogt_camera_get_view(ogt_camera_t *cam, mat4 dest) {
+    vec3 center;
+    glm_vec3_add(cam->pos, cam->front, center);
+    glm_lookat(cam->pos, center, cam->up, dest);
+}
+
+void ogt_camera_get_projection(const ogt_camera_t *cam, mat4 dest) {
+    glm_perspective(glm_rad(cam->fov), cam->aspect, cam->z_near, cam->z_far, dest);
+}
+
+void ogt_camera_process_keyboard(ogt_camera_t *cam, ogt_camera_movement dir, float dt) {
+    const float velocity = cam->speed * dt;
+    vec3 tmp;
+
+    switch (dir) {
+        case OGT_CAMERA_FORWARD:
+            glm_vec3_scale(cam->front, velocity, tmp);
+            glm_vec3_add(cam->pos, tmp, cam->pos);
+            break;
+        case OGT_CAMERA_BACKWARD:
+            glm_vec3_scale(cam->front, velocity, tmp);
+            glm_vec3_sub(cam->pos, tmp, cam->pos);
+            break;
+        case OGT_CAMERA_LEFT:
+            glm_vec3_scale(cam->right, velocity, tmp);
+            glm_vec3_sub(cam->pos, tmp, cam->pos);
+            break;
+        case OGT_CAMERA_RIGHT:
+            glm_vec3_scale(cam->right, velocity, tmp);
+            glm_vec3_add(cam->pos, tmp, cam->pos);
+            break;
+        default:
+            break;
+    }
+}
+
+void ogt_camera_process_mouse(ogt_camera_t *cam, float x_offset, float y_offset, int constrain_pitch) {
+    x_offset *= cam->sens;
+    y_offset *= cam->sens;
+
+    cam->yaw += x_offset;
+    cam->pitch += y_offset;
+
+    if (constrain_pitch) {
+        if (cam->pitch > 89.f) cam->pitch = 89.f;
+        if (cam->pitch < -89.f) cam->pitch = -89.f;
+    }
+
+    ogt_camera_update_vectors(cam);
+}
 
 GLuint ogt_build_shader_src(const char *vertex_shader_src, const char *fragment_shader_src) {
     GLuint vertex_shader = 0, fragment_shader = 0, program = 0;
@@ -105,6 +186,27 @@ GLFWwindow *ogt_create_window_and_context(int width, int height, const char *tit
     print_info();
 
     return window;
+}
+
+static void ogt_camera_update_vectors(ogt_camera_t *cam) {
+    vec3 front;
+
+    const float yaw_rad = glm_rad(cam->yaw);
+    const float pitch_rad = glm_rad(cam->pitch);
+
+    front[0] = cosf(yaw_rad) * cosf(pitch_rad);
+    front[1] = sinf(pitch_rad);
+    front[2] = sinf(yaw_rad) * cosf(pitch_rad);
+
+    glm_vec3_normalize_to(front, cam->front);
+
+    // right = normalize(cross(front, world_up))
+    glm_vec3_cross(cam->front, cam->world_up, cam->right);
+    glm_vec3_normalize(cam->right);
+
+    // up = normalize(cross(right, front))
+    glm_vec3_cross(cam->right, cam->front, cam->up);
+    glm_vec3_normalize(cam->up);
 }
 
 static void framebuffer_size_callback(GLFWwindow *window, int width, int height) {

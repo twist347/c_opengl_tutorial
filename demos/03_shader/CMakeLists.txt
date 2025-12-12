@@ -14,7 +14,7 @@ foreach (src ${SHADER_DEMO_SOURCE})
 
     add_executable(${target} ${src})
     target_compile_definitions(${target} PRIVATE GLFW_INCLUDE_NONE)
-    target_link_libraries(${target} PRIVATE glad glfw OpenGL::GL m ogt_util)
+    target_link_libraries(${target} PRIVATE m ogt_util)
     target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
 
     set_target_properties(${target} PROPERTIES
