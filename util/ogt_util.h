@@ -58,7 +58,6 @@ typedef enum {
 
 void ogt_camera_init(ogt_camera_t *cam, vec3 position, float aspect);
 
-// если нужно поменять проекцию (например, при resize окна)
 void ogt_camera_set_perspective(ogt_camera_t *cam, float fov, float z_near, float z_far, float aspect);
 
 void ogt_camera_get_view(ogt_camera_t *cam, mat4 dest);
